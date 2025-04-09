@@ -1,0 +1,31 @@
+x-bag-source: &BAG_SOURCE "${HOME}/bagfiles"
+
+services:
+  airslam:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ipc: host
+    tty: true
+    privileged: true
+    environment:
+      DISPLAY: $DISPLAY
+      TERM: screen-256color
+      NVIDIA_DRIVER_CAPABILITIES: all
+      ROS_DISTRO: ${ROS_DISTRO:-noetic}
+    volumes:
+      - type: bind
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
+      - type: bind
+        source: *BAG_SOURCE
+        target: /home/user/bagfiles
+    working_dir: /home/user/ws
+    command: /bin/bash
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
